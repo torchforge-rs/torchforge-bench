@@ -2,6 +2,7 @@
 name = "torchforge-bench"
 version = "0.0.1"
 edition = "2024"
+rust-version = "1.85.0"
 description = "ML benchmark suite for reproducing paper results in Rust — faster and leaner than Python references."
 license = "Apache-2.0"
 readme = "README.md"

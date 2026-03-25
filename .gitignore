@@ -1,2 +1,65 @@
-/target
+# Rust build artifacts
+/target/
 Cargo.lock
+
+# Backup files
+*~
+*.swp
+*.swo
+.*.swp
+
+# IDE files
+.vscode/
+.idea/
+.windsurf/
+*.sublime-*
+.fleet/
+.nova/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Profiling data
+*.profraw
+*.prof
+
+# Scratch benchmark output (published results in results/ are tracked)
+bench_results/
+*.bench
+
+# Documentation build
+/docs/build/
+/book/
+
+# Local configuration
+.env
+.env.local
+.env.*.local
+
+# Cache directories
+.cache/
+*.cache
+
+# Test coverage
+tarpaulin-report.html
+cobertura.xml
+
+# Rust analyzer
+.rust-analyzer/
+
+# Debug files
+*.dSYM/
+*.pdb
