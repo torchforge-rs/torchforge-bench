@@ -1,0 +1,12 @@
+[package]
+name = "torchforge-bench"
+version = "0.0.1"
+edition = "2024"
+description = "ML benchmark suite for reproducing paper results in Rust — faster and leaner than Python references."
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/torchforge-rs/torchforge-bench"
+keywords = ["machine-learning", "benchmark", "reproducibility", "edge", "rust"]
+categories = ["science", "development-tools"]
+
+[dependencies]
