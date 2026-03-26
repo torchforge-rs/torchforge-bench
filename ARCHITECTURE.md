@@ -1,6 +1,10 @@
 # Architecture
 
 > Living document. Decisions marked `[OPEN]` are not yet settled. Settled decisions are marked `[DECIDED]` with rationale. No assumption is papered over.
+>
+> **Changelog**:
+> - `2026-03-26` — Added `## FDRL Benchmark Target (v1.x)` section; updated `## Out of Scope` to reflect that distributed training benchmarks are the v1.x north star, not forgotten.
+> - `2026-03-26 (v2)` — Added `## Rust ML Ecosystem Context` section from project knowledge section 13; updated `## Neural Network Backend Decision` with explicit ecosystem grounding (burn = training, candle = inference/LLMs).
 
 ---
 
@@ -15,6 +19,9 @@ This requires:
 3. The same environment, driven from Rust
 4. Documented hardware, documented measurement methodology
 5. Published results — including results where Rust is slower
+
+<!-- v2: 2026-03-26 — FDRL north star context added to problem statement -->
+**v1.x north star** *(added 2026-03-26)*: The v0.x benchmark suite (DQN → PPO → SAC on single-device edge hardware) builds the credibility foundation for the v1.x claim: the first reproducible FDRL benchmark suite in Rust for edge hardware. Every methodology decision made at v0.x must hold under the federated case — same hardware documentation requirements, same seed discipline, same publication standards. The difference at v1.x is that the benchmark spans a fleet of devices, not one.
 
 ---
 
@@ -142,6 +149,29 @@ End-to-end training runs are too long for `criterion`. A custom harness will:
 
 ---
 
+## Rust ML Ecosystem Context *(added 2026-03-26)*
+
+Project knowledge section 13 establishes where torchforge sits in the Rust ML stack. Reproduced here because it directly informs the neural network backend decision below.
+
+**Layer mapping (libtorch → Rust nearest equivalents):**
+
+| libtorch component | Rust nearest equivalent | Gap |
+|---|---|---|
+| ATen (tensor ops) | `candle-core` | Small — actively maintained |
+| Autograd | `burn` autodiff | Functional, less mature |
+| Dispatcher | `burn` backend trait | Different design, similar intent |
+| TorchScript JIT | `tract` (ONNX only) | No native `.pt` executor (increasingly moot — PyTorch moving to `torch.export`) |
+
+**Framework positions (from project knowledge section 13):**
+- `tch-rs` — Rust bindings to libtorch. ~800MB C++ dependency. **Explicitly excluded** — not viable for edge.
+- `burn` — Native Rust framework inspired by PyTorch design. No C++ dependency. Modular backends: `ndarray`, `wgpu`, `candle`, CUDA.
+- `candle` — HuggingFace's minimalist ML framework. **Best for inference + LLMs.**
+- `torchforge` — **builds ON TOP of burn/candle** for the edge RL training use case.
+
+The explicit positioning matters: candle is described as best for inference and LLMs, not training. torchforge's use case is on-device RL training — a training workload. This grounding informs the backend decision below.
+
+---
+
 ## Neural Network Backend Decision
 
 DQN requires a small MLP (2-3 layers). The backend choice affects:
@@ -151,11 +181,11 @@ DQN requires a small MLP (2-3 layers). The backend choice affects:
 - Maintenance burden
 
 Candidates:
-- `burn` with `ndarray` backend — pure Rust, no C++ dependency, CPU-only
-- `candle` — HuggingFace, actively maintained, Metal/CUDA support
-- `tch-rs` — full PyTorch, but ~800MB dependency (unacceptable for edge)
+- `burn` with `ndarray` backend — pure Rust, no C++ dependency, CPU-only. Designed for training workloads; project knowledge section 13 positions torchforge as building on top of burn for exactly this use case.
+- `candle` — HuggingFace, actively maintained, Metal/CUDA support. Project knowledge section 13 explicitly positions candle as "best for inference + LLMs" — not the primary target for on-device RL training.
+- `tch-rs` — full PyTorch, ~800MB dependency. **Explicitly excluded** per project knowledge section 9 and section 13 — unacceptable for edge.
 
-**[DECIDED]**: Prototype both `burn`+`ndarray` and `candle` with a minimal DQN Q-network + backward pass. Compare compile time, binary size, autodiff correctness, and API ergonomics. Expecting `burn`+`ndarray` to win for CartPole (no GPU needed). Reassess at v0.4 when GPU support may matter for continuous control.
+**[DECIDED]**: Prototype both `burn`+`ndarray` and `candle` with a minimal DQN Q-network + backward pass. Compare compile time, binary size, autodiff correctness, and API ergonomics. Ecosystem positioning from project knowledge section 13 strengthens the lean toward `burn`+`ndarray` — the training use case is burn's design target, not candle's. Prototyping both is still required before committing; the lean is grounded, not conclusive. Reassess at v0.4 when GPU support may matter for continuous control.
 
 ---
 
@@ -169,9 +199,61 @@ Candidates:
 
 ---
 
+<!-- v2: 2026-03-26 — FDRL benchmark target section added -->
+## FDRL Benchmark Target (v1.x) *(added 2026-03-26)*
+
+The v1.x benchmark goal is the **first reproducible FDRL benchmark suite in Rust for edge hardware**, intended for arXiv publication with externally reviewed methodology.
+
+FDRL (Federated Deep Reinforcement Learning) is an established academic term — used in IEEE DySPAN 2021 (wireless power control), arXiv 2412.12543 (edge content caching), arXiv 2505.12153 (robotic-assisted surgery). All domain-specific; no production tooling; no Rust implementation exists as of March 2026.
+
+**The benchmark claim torchforge will earn at v1.x:**
+> "Every FDRL paper describes the problem. torchforge is the first stack that lets you deploy it — and we have the benchmarks to prove it."
+
+### What the v1.x FDRL benchmark requires that v0.x does not:
+
+| Requirement | v0.x | v1.x |
+|---|---|---|
+| Environment | Single device, Gymnasium/native | Fleet of simulated edge devices |
+| Algorithm | DQN, PPO, SAC (single-agent) | DQN/PPO with FedAvg aggregation |
+| Metric | Episode return per device | Global policy return + per-device convergence |
+| Hardware | 1 workstation or 1 edge device | Multiple edge devices (or simulated fleet) |
+| Baseline | CleanRL Python | No established Python FDRL benchmark — we define the baseline |
+| Publication target | Internal / blog | arXiv, externally reviewed |
+
+### Methodology extension for FDRL benchmarks:
+
+The methodology table from `## Measurement Methodology` must be extended with:
+
+| Additional field | Description |
+|---|---|
+| Number of devices | Fleet size (simulated or physical) |
+| Aggregation algorithm | FedAvg (baseline); others at v1.x+ |
+| Communication rounds | Total federation rounds, steps per round |
+| Gradient noise (if DP) | Differential privacy parameters, if applied |
+| Global policy evaluation | Evaluation protocol for the aggregated policy |
+| Device heterogeneity | Whether all devices run identical hardware |
+
+**No FDRL result is published without all fields populated** — same standard as v0.x single-device benchmarks.
+
+### v0.x decisions that must hold at v1.x:
+
+- The `ReplayBuffer` API in torchforge-data must not require a breaking change to support per-device local buffers in a federation
+- The JSON results schema designed at v0.1.0 must be extensible to include federation fields without invalidating existing results
+- The benchmark hygiene checklist applies per-device in a fleet — thermal throttling on one device in the fleet invalidates the run
+
+### What FDRL benchmarks do NOT require from v0.x:
+
+- No federation protocol code at v0.x
+- No multi-device test harness at v0.x
+- No gradient aggregation at v0.x
+
+The v0.x benchmark suite is not a stepping stone toward FDRL — it IS the foundation. Every result published at v0.x contributes to the credibility of the v1.x FDRL claim.
+
+---
+
 ## Out of Scope (v0.x)
 
 - Atari benchmarks (requires ALE, complex dependency)
 - MuJoCo / continuous control (requires MuJoCo license and native port)
 - Multi-agent benchmarks
-- Distributed training benchmarks
+- Distributed training benchmarks — *this is the v1.x FDRL target; explicitly not forgotten, see `## FDRL Benchmark Target (v1.x)`*
