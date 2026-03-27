@@ -1,0 +1,40 @@
+# Code Owners for TorchForge Bench
+
+# Global owners for the entire repository
+* @torchforge-rs/core @SHA888
+
+# Architecture and design decisions
+ARCHITECTURE.md @torchforge-rs/core @SHA888
+
+# Benchmark results and methodology
+results/ @torchforge-rs/core @SHA888
+
+# Python baseline implementations
+baselines/ @torchforge-rs/core @SHA888
+
+# Security and licensing
+SECURITY.md @torchforge-rs/security @SHA888
+LICENSE @torchforge-rs/core @SHA888
+
+# Core project configuration
+Cargo.toml @torchforge-rs/core @SHA888
+rust-toolchain.toml @torchforge-rs/core @SHA888
+
+# Supply chain and dependencies
+deny.toml @torchforge-rs/core @SHA888
+Cargo.lock @torchforge-rs/core @SHA888
+
+# CI/CD configuration
+.github/workflows/ @torchforge-rs/core @SHA888
+
+# Documentation
+README.md @torchforge-rs/core @SHA888
+CHANGELOG.md @torchforge-rs/core @SHA888
+
+# Governance documents
+CODE_OF_CONDUCT.md @torchforge-rs/core @SHA888
+CONTRIBUTING.md @torchforge-rs/core @SHA888
+
+# Issue and PR templates
+.github/ISSUE_TEMPLATE/ @torchforge-rs/core @SHA888
+.github/PULL_REQUEST_TEMPLATE.md @torchforge-rs/core @SHA888

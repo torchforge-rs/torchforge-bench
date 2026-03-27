@@ -1,0 +1,92 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install cargo-audit
+      run: cargo install cargo-audit --locked
+
+    - name: Run cargo audit
+      run: cargo audit
+      continue-on-error: true  # Don't fail the build for advisories, just report them
+
+    - name: Install cargo-deny
+      run: cargo install cargo-deny --locked
+
+    - name: Run cargo deny check
+      run: cargo deny check
+
+    - name: Check for outdated dependencies
+      run: cargo outdated --root-deps-only
+      continue-on-error: true
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
+        fail-on-severity: moderate
+
+  license-check:
+    name: License Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Install cargo-deny
+      run: cargo install cargo-deny --locked
+
+    - name: Check licenses
+      run: cargo deny check licenses
+
+    - name: Check license headers
+      run: |
+        # Check if LICENSE file exists and has content
+        if [ ! -f LICENSE ]; then
+          echo "LICENSE file is missing"
+          exit 1
+        fi
+        if [ ! -s LICENSE ]; then
+          echo "LICENSE file is empty"
+          exit 1
+        fi
+
+        # Check for Apache-2.0 in LICENSE
+        if ! grep -q "Apache License" LICENSE; then
+          echo "LICENSE file does not contain Apache License"
+          exit 1
+        fi
+
+        # Check Cargo.toml license field
+        if ! grep -q 'license = "Apache-2.0"' Cargo.toml; then
+          echo "Cargo.toml does not have correct license field"
+          exit 1
+        fi

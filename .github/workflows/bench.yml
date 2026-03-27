@@ -1,0 +1,169 @@
+name: Rust Benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      benchmark:
+        description: 'Benchmark to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - dqn
+          - ppo
+          - a2c
+      target:
+        description: 'Benchmark target'
+        required: true
+        default: 'native'
+        type: choice
+        options:
+          - native
+          - wasm
+      profile:
+        description: 'Profiling enabled'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  run-benchmarks:
+    name: Run Rust Benchmarks
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+
+    - name: Cache cargo build
+      uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-build-target-
+
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+
+    - name: Clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Build benchmarks
+      run: cargo build --benches --verbose
+
+    - name: Run benchmarks
+      run: |
+        if [ "${{ github.event.inputs.benchmark }}" == "all" ]; then
+          echo "Running all benchmarks..."
+          cargo bench --all
+        else
+          echo "Running ${{ github.event.inputs.benchmark }} benchmark..."
+          cargo bench ${{ github.event.inputs.benchmark }}
+        fi
+
+    - name: Run benchmarks with profiling
+      if: github.event.inputs.profile == 'true'
+      run: |
+        echo "Running benchmarks with profiling..."
+        if [ "${{ github.event.inputs.benchmark }}" == "all" ]; then
+          cargo bench --all -- --profile-time 30
+        else
+          cargo bench ${{ github.event.inputs.benchmark }} -- --profile-time 30
+        fi
+
+    - name: Generate benchmark report
+      run: |
+        echo "## Benchmark Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Configuration" >> $GITHUB_STEP_SUMMARY
+        echo "- **Benchmark**: ${{ github.event.inputs.benchmark }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Target**: ${{ github.event.inputs.target }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Profiling**: ${{ github.event.inputs.profile }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Rust**: $(rustc --version)" >> $GITHUB_STEP_SUMMARY
+        echo "- **OS**: Ubuntu (GitHub Actions)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: benchmark-results-${{ github.event.inputs.benchmark }}-${{ github.run_number }}
+        path: |
+          target/criterion/
+          **/benches/results/
+        retention-days: 30
+
+    - name: Upload profiling data
+      uses: actions/upload-artifact@v4
+      if: github.event.inputs.profile == 'true' && always()
+      with:
+        name: profiling-data-${{ github.event.inputs.benchmark }}-${{ github.run_number }}
+        path: |
+          **/*.profraw
+          **/*.prof
+          flamegraph.svg
+        retention-days: 7
+
+  wasm-benchmarks:
+    name: WASM Benchmarks
+    runs-on: ubuntu-latest
+    if: github.event.inputs.target == 'wasm'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        target: wasm32-unknown-unknown
+
+    - name: Install wasm-pack
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Build WASM benchmarks
+      run: |
+        if [ "${{ github.event.inputs.benchmark }}" == "all" ]; then
+          echo "Building all WASM benchmarks..."
+          # Build each benchmark for WASM
+          for bench in benches/*.rs; do
+            if [ -f "$bench" ]; then
+              echo "Building $(basename $bench .rs) for WASM..."
+              cargo build --target wasm32-unknown-unknown --bench $(basename $bench .rs)
+            fi
+          done
+        else
+          echo "Building ${{ github.event.inputs.benchmark }} for WASM..."
+          cargo build --target wasm32-unknown-unknown --bench ${{ github.event.inputs.benchmark }}
+        fi
+
+    - name: Run WASM benchmarks
+      run: |
+        echo "Note: WASM benchmarks require browser environment"
+        echo "Actual WASM benchmark execution should be done locally"
+        echo "This step only verifies WASM compilation"
+
+    - name: Upload WASM artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: wasm-artifacts-${{ github.event.inputs.benchmark }}-${{ github.run_number }}
+        path: |
+          target/wasm32-unknown-unknown/release/*.wasm
+        retention-days: 7

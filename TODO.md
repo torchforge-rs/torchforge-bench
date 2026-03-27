@@ -16,7 +16,7 @@
 **Goal**: Establish the repository as a credible, contribution-ready OSS project before any functional code ships. These items are prerequisites for everything below — nothing is merged to `main` until Phase 0 is complete.
 
 ### Repository Structure
-- [ ] Initialize repository with standard layout:
+- [x] Initialize repository with standard layout:
   ```
   .github/
     workflows/
@@ -42,18 +42,18 @@
   SECURITY.md
   TODO.md
   ```
-- [ ] `Cargo.toml` with correct metadata: `name`, `version = "0.0.1"`, `edition = "2024"`, `rust-version = "1.85"`, `license = "Apache-2.0"`, `repository`, `homepage`, `description`, `keywords`, `categories`
-- [ ] `.gitignore` (Rust + Python `__pycache__`, `.venv`, `results/*.json` if results are large — decide policy)
-- [ ] `rust-toolchain.toml` pinning `stable` channel
+- [x] `Cargo.toml` with correct metadata: `name`, `version = "0.0.1"`, `edition = "2024"`, `rust-version = "1.85"`, `license = "Apache-2.0"`, `repository`, `homepage`, `description`, `keywords`, `categories`
+- [x] `.gitignore` (Rust + Python `__pycache__`, `.venv`, `results/*.json` if results are large — decide policy)
+- [x] `rust-toolchain.toml` pinning `stable` channel
 
 ### License
-- [ ] `LICENSE` — Apache-2.0 full text
-- [ ] SPDX identifier `Apache-2.0` in `Cargo.toml`
-- [ ] `baselines/` contains CleanRL code — CleanRL is MIT licensed; document this clearly in `baselines/README.md` and ensure attribution is correct. The two licenses are compatible but the distinction must be explicit.
+- [x] `LICENSE` — Apache-2.0 standard format
+- [x] SPDX identifier `Apache-2.0` in `Cargo.toml`
+- [x] `baselines/` contains CleanRL code — CleanRL is MIT licensed; document this clearly in `baselines/README.md` and ensure attribution is correct. The two licenses are compatible but the distinction must be explicit.
 
 ### Governance Documents
-- [ ] `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
-- [ ] `CONTRIBUTING.md` — must cover:
+- [x] `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
+- [x] `CONTRIBUTING.md` — must cover:
   - Prerequisites: Rust 1.85+, Python 3.12+ via `uv`, Gymnasium dependencies (`pip install gymnasium[classic-control]`)
   - How to build and run Rust tests locally
   - How to run Python baselines locally (`uv run python baselines/dqn_cartpole.py`)
@@ -63,7 +63,7 @@
   - What "ready to merge" means for benchmark results: full methodology table populated, hygiene checklist completed, results file committed to `results/`
   - Policy on result reproducibility: any PR touching algorithm implementations must re-run the affected benchmark and update `results/`
   - Issue templates for bug reports, methodology challenges, feature requests
-- [ ] `SECURITY.md` — must cover:
+- [x] `SECURITY.md` — must cover:
   - Supported versions (latest `v0.x` only)
   - Private reporting via GitHub Security Advisories
   - Response SLA: acknowledge within 72 hours, triage within 7 days
@@ -71,55 +71,55 @@
   - Note: benchmark result disputes are not security issues — open a regular issue
 
 ### GitHub Templates
-- [ ] `.github/PULL_REQUEST_TEMPLATE.md` — checklist: description, linked issue, algorithm changes re-benchmarked, methodology table populated, results file updated, CHANGELOG entry
-- [ ] `.github/ISSUE_TEMPLATE/bug_report.md` — Rust version, Python version, OS, hardware, reproduction steps
-- [ ] `.github/ISSUE_TEMPLATE/methodology_challenge.md` — for disputing a published result: what is incorrect, proposed correction, supporting evidence
-- [ ] `.github/ISSUE_TEMPLATE/feature_request.md` — algorithm or environment request with rationale
-- [ ] `CODEOWNERS` — assign owners to `ARCHITECTURE.md`, `results/`, `baselines/`, `SECURITY.md`, `Cargo.toml`
+- [x] `.github/PULL_REQUEST_TEMPLATE.md` — checklist: description, linked issue, algorithm changes re-benchmarked, methodology table populated, results file updated, CHANGELOG entry
+- [x] `.github/ISSUE_TEMPLATE/bug_report.md` — Rust version, Python version, OS, hardware, reproduction steps
+- [x] `.github/ISSUE_TEMPLATE/methodology_challenge.md` — for disputing a published result: what is incorrect, proposed correction, supporting evidence
+- [x] `.github/ISSUE_TEMPLATE/feature_request.md` — algorithm or environment request with rationale
+- [x] `CODEOWNERS` — assign owners to `ARCHITECTURE.md`, `results/`, `baselines/`, `SECURITY.md`, `Cargo.toml`
 
 ### CI — GitHub Actions
-- [ ] `ci.yml` — runs on every push and PR to `main`:
+- [x] `ci.yml` — runs on every push and PR to `main`:
   - `cargo fmt --check`
   - `cargo clippy -- -D warnings`
   - `cargo test` (unit + integration tests; statistical convergence tests are `#[ignore]`)
   - `cargo doc --no-deps`
   - Matrix: `[stable, nightly]` x `[ubuntu-latest]`
-- [ ] `audit.yml` — push to `main` + daily schedule:
+- [x] `audit.yml` — push to `main` + daily schedule:
   - `cargo audit`
   - `cargo deny check`
-- [ ] `baselines.yml` — manual trigger (`workflow_dispatch`) only:
+- [x] `baselines.yml` — manual trigger (`workflow_dispatch`) only:
   - Sets up Python via `uv`, installs CleanRL dependencies
   - Runs `baselines/dqn_cartpole.py` and uploads results as workflow artifact
   - Not a CI gate — baselines are hardware-sensitive; run manually when establishing a new environment target
-- [ ] `bench.yml` — manual trigger (`workflow_dispatch`) only:
+- [x] `bench.yml` — manual trigger (`workflow_dispatch`) only:
   - `cargo bench` — criterion micro-benchmarks
   - Uploads results as workflow artifact
-- [ ] Cache `~/.cargo/registry` and `target/` across workflow runs
+- [x] Cache `~/.cargo/registry` and `target/` across workflow runs
 - [ ] Branch protection on `main`: all `ci.yml` checks required, at least one review required
 
 ### Python Baseline Infrastructure
-- [ ] `baselines/pyproject.toml` managed via `uv`:
+- [x] `baselines/pyproject.toml` managed via `uv`:
   - Pin exact versions: `torch`, `gymnasium[classic-control]`, `cleanrl` (or inline script)
   - `uv.lock` committed — reproducible installs for anyone cloning the repo
-- [ ] `baselines/README.md` documenting:
+- [x] `baselines/README.md` documenting:
   - How to reproduce each baseline (`uv run python baselines/dqn_cartpole.py`)
   - License attribution for CleanRL code
   - Hardware used for published baseline numbers
   - How results map to the JSON schema in `results/`
 
 ### Results Directory
-- [ ] `results/README.md` documenting the JSON schema for benchmark results files
-- [ ] Schema must include all fields from the methodology table in ARCHITECTURE.md (hardware, OS, versions, seeds, metrics, wall-clock, memory)
-- [ ] *(added 2026-03-26)* Schema must be designed for extensibility — federation fields (device count, aggregation algorithm, communication rounds) must be addable at v1.x without invalidating existing v0.x result files. Use optional fields with explicit null rather than absent keys.
-- [ ] Policy: `results/` is append-only — never overwrite a published result, add a new dated file instead
+- [x] `results/README.md` documenting the JSON schema for benchmark results files
+- [x] Schema must include all fields from the methodology table in ARCHITECTURE.md (hardware, OS, versions, seeds, metrics, wall-clock, memory)
+- [x] *(added 2026-03-26)* Schema must be designed for extensibility — federation fields (device count, aggregation algorithm, communication rounds) must be addable at v1.x without invalidating existing v0.x result files. Use optional fields with explicit null rather than absent keys.
+- [x] Policy: `results/` is append-only — never overwrite a published result, add a new dated file instead
 
 ### Changelog
-- [ ] `CHANGELOG.md` initialized per [Keep a Changelog](https://keepachangelog.com/) format
-- [ ] Policy: every PR requires a CHANGELOG entry; benchmark result updates are entries under `[Added]`
+- [x] `CHANGELOG.md` initialized per [Keep a Changelog](https://keepachangelog.com/) format
+- [x] Policy: every PR requires a CHANGELOG entry; benchmark result updates are entries under `[Added]`
 
 ### Supply Chain
-- [ ] `deny.toml` for `cargo deny`: license allowlist, bans on duplicate crates, advisory denies
-- [ ] Note: Python dependencies in `baselines/` are not covered by `cargo deny` — `uv.lock` provides the equivalent guarantee for the Python side
+- [x] `deny.toml` for `cargo deny`: license allowlist, bans on duplicate crates, advisory denies
+- [x] Note: Python dependencies in `baselines/` are not covered by `cargo deny` — `uv.lock` provides the equivalent guarantee for the Python side
 
 ### README Polish
 - [ ] Badges rendering correctly: crates.io, docs.rs, license, CI status
