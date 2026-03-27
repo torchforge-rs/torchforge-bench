@@ -100,12 +100,7 @@ jobs:
     - name: Check baseline imports
       run: |
         cd baselines
-        uv run python -c "
-import torch
-import gymnasium
-import numpy as np
-print('All imports successful')
-"
+        uv run python -c 'import torch; import gymnasium; import numpy as np; print("All imports successful")'
 
   security:
     name: Security Audit
