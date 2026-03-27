@@ -1,19 +1,6 @@
 # Cargo Deny Configuration for TorchForge Bench
 # This file enforces dependency policies and license compliance
 
-# Graph configuration
-[graph]
-targets = [
-    { triple = "x86_64-unknown-linux-gnu" },
-    { triple = "x86_64-pc-windows-msvc" },
-    { triple = "x86_64-apple-darwin" },
-    { triple = "aarch64-apple-darwin" },
-]
-
-# Output configuration
-[output]
-feature-depth = 1
-
 # License configuration
 [licenses]
 allow = [
@@ -27,30 +14,12 @@ allow = [
     "OpenSSL",
 ]
 confidence-threshold = 0.8
-exceptions = [
-    # Allow specific crates with non-standard licenses
-    { allow = ["OpenSSL"], name = "ring", version = "*" },
-]
-
-# Copyleft licenses that require special attention
-copyleft = "warn"
-
-# License source configuration
-[licenses.private]
-ignore = false
 
 # Bans configuration
 [bans]
-# Deny duplicate crates
 multiple-versions = "warn"
 wildcards = "allow"
 highlight = "all"
-workspace-default-features = "allow"
-external-default-features = "allow"
-allow = []
-deny = []
-skip = []
-skip-tree = []
 
 # Specific bans for security or compatibility reasons
 [[bans.deny]]
@@ -63,67 +32,10 @@ reason = "Prefer rustls for TLS implementation"
 
 # Advisory configuration
 [advisories]
-# The path where the advisory database is cloned/fetched into
-db-path = "~/.cargo/advisory-db"
-# The url(s) of the advisory databases to use
-db-urls = ["https://github.com/rustsec/advisory-db"]
-# The lint level for security vulnerabilities
-vulnerability = "deny"
-vulnerability-metadata = "deny"
-unmaintained = "warn"
-yanked = "warn"
-notice = "warn"
-# Ignore specific advisories (ID, reason)
-ignore = [
-    # Example: "RUSTSEC-2020-0001",
-]
 
 # Sources configuration
 [sources]
-# Lint level for what to happen when a crate from a crate registry that is not
-# in the allow list is encountered
 unknown-registry = "warn"
-# Lint level for what to happen when a crate from a git repository that is not
-# in the allow list is encountered
 unknown-git = "warn"
-# List of URLs for allowed crate registries. Defaults to the crates.io index
-# if not specified. If it is specified but empty, no registries are allowed.
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
-# List of URLs for allowed Git repositories
 allow-git = []
-
-# Feature policies
-[features]
-deny = [
-    # Deny features that include unnecessary dependencies
-    { name = "default", crate = "log", reason = "Prefer explicit feature selection" },
-]
-
-# Specific crate policies
-[[bans.deny]]
-name = "log"
-reason = "Use tracing instead"
-wrappers = []
-
-# Allow specific crates with multiple versions when necessary
-[[bans.allow]]
-name = "syn"
-version = "1"
-reason = "Needed for compatibility with some proc macros"
-
-[[bans.allow]]
-name = "syn"
-version = "2"
-reason = "Latest version for new code"
-
-# Security advisories to ignore temporarily
-[[advisories.ignore]]
-id = "RUSTSEC-2023-0052"
-reason = "Temporary workaround until dependency is updated"
-
-# Workspace-specific policies
-[workspace]
-# Exclude certain crates from checks
-exclude = [
-    "target/debug/build",
-]
