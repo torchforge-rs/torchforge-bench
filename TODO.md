@@ -122,10 +122,10 @@
 - [x] Note: Python dependencies in `baselines/` are not covered by `cargo deny` — `uv.lock` provides the equivalent guarantee for the Python side
 
 ### README Polish
-- [ ] Badges rendering correctly: crates.io, docs.rs, license, CI status
-- [ ] Prerequisites section: Rust, Python, `uv`
-- [ ] "Results" section links to `results/` once first benchmark is published
-- [ ] Links to `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`
+- [x] Badges rendering correctly: crates.io, docs.rs, license, CI status
+- [x] Prerequisites section: Rust, Python, `uv`
+- [x] "Results" section links to `results/` once first benchmark is published
+- [x] Links to `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md`
 
 ---
 

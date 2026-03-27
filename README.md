@@ -12,6 +12,38 @@ Part of the [torchforge-rs](https://github.com/torchforge-rs) ecosystem.
 
 ---
 
+## Prerequisites
+
+Before getting started with TorchForge Bench, ensure you have:
+
+### Rust
+- **Version**: 1.85.0 or higher
+- **Installation**: [rustup.rs](https://rustup.rs/)
+- **Components**: `rustfmt`, `clippy`
+- **Toolchain**: Automatically managed via `rust-toolchain.toml`
+
+### Python
+- **Version**: 3.12 or higher
+- **Installation**: [python.org](https://www.python.org/)
+- **Package Management**: [`uv`](https://docs.astral.sh/uv/)
+
+### uv (Python Package Manager)
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Verify installation
+uv --version
+```
+
+### Gymnasium Dependencies
+```bash
+# Install via uv (handled automatically in baselines/)
+uv add gymnasium[classic-control]
+```
+
+---
+
 ## Why
 
 Two facts are simultaneously true today:
@@ -75,6 +107,28 @@ The v1.x FDRL benchmark is the north star. Every methodology decision made at v0
 
 ---
 
+## Results
+
+Published benchmark results will be available in the [`results/`](results/) directory once the first benchmark (DQN on CartPole-v1) is completed in v0.1.0.
+
+### Results Format
+All results follow a standardized JSON schema documented in [`results/README.md`](results/README.md), including:
+- Complete hardware specifications
+- Software versions and environment details
+- Performance metrics with statistical analysis
+- Reproducibility information (seeds, multiple runs)
+
+### Methodology
+Every published result includes a complete methodology table with:
+- Hardware: CPU, GPU, RAM, storage specifications
+- Software: Rust, Python, dependency versions
+- Parameters: Hyperparameters, random seeds, training configuration
+- Metrics: Performance, efficiency, resource utilization
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the complete methodology specification.
+
+---
+
 ## Reproducing Baselines
 
 Python baselines are managed via [`uv`](https://docs.astral.sh/uv/) with a committed lockfile — reproducible installs, no loose pip.
@@ -102,7 +156,13 @@ Every published result includes: exact hardware, OS, Rust version, Python/PyTorc
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide — prerequisites (Rust, Python, `uv`), branching model, PR process, and the result reproducibility policy.
+We welcome contributions! Please read our comprehensive guides before participating:
+
+- 📖 **[Contributing Guide](CONTRIBUTING.md)** — Prerequisites, development setup, PR process, and result reproducibility policy
+- 🤝 **[Code of Conduct](CODE_OF_CONDUCT.md)** — Community standards and guidelines
+- 🔒 **[Security Policy](SECURITY.md)** — Security vulnerability reporting
+
+### How to Contribute
 
 The most valuable contributions right now are:
 
@@ -110,6 +170,30 @@ The most valuable contributions right now are:
 - Running the NN backend prototypes (`burn`+`ndarray` vs `candle`) and reporting compile time, binary size, and autodiff correctness
 - Measuring PyO3 FFI overhead on `CartPole-v1 env.step()`
 - Challenging assumptions in [ARCHITECTURE.md](ARCHITECTURE.md)
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/torchforge-rs/torchforge-bench.git
+cd torchforge-bench
+
+# Install Rust toolchain (automatically managed)
+rustup component add rustfmt clippy
+
+# Set up Python baselines
+cd baselines/
+uv sync
+
+# Run tests
+cargo test
+
+# Format code
+cargo fmt
+
+# Lint code
+cargo clippy -- -D warnings
+```
 
 **Open an issue before submitting a PR.**
 
