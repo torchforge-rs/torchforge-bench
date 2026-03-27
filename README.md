@@ -6,41 +6,19 @@ Part of the [torchforge-rs](https://github.com/torchforge-rs) ecosystem.
 
 [![Crates.io](https://img.shields.io/crates/v/torchforge-bench.svg)](https://crates.io/crates/torchforge-bench)
 [![Docs.rs](https://docs.rs/torchforge-bench/badge.svg)](https://docs.rs/torchforge-bench)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/torchforge-rs/torchforge-bench/blob/main/LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2024%20edition-orange.svg)](https://blog.rust-lang.org/2025/02/20/Rust-1.85.0/)
 [![CI](https://github.com/torchforge-rs/torchforge-bench/actions/workflows/ci.yml/badge.svg)](https://github.com/torchforge-rs/torchforge-bench/actions/workflows/ci.yml)
 
 ---
 
-## Prerequisites
+## The Destination
 
-Before getting started with TorchForge Bench, ensure you have:
+The long-term target of the torchforge-rs ecosystem is **Federated Deep Reinforcement Learning (FDRL) at the edge**: a fleet of constrained devices, each running a local DRL agent learning from its own physical environment, sharing only gradients with a coordinator. No cloud. No Python.
 
-### Rust
-- **Version**: 1.85.0 or higher
-- **Installation**: [rustup.rs](https://rustup.rs/)
-- **Components**: `rustfmt`, `clippy`
-- **Toolchain**: Automatically managed via `rust-toolchain.toml`
+`torchforge-bench` is the proof layer for that target. The v1.x paper goal — the first reproducible FDRL benchmark suite in Rust for edge hardware — is only credible if the v0.x single-device numbers are rigorous first. Every methodology decision made here (hardware documentation, seed discipline, apples-to-apples comparison against CleanRL) is made with the federated case in mind: the same standards will apply across a fleet of devices.
 
-### Python
-- **Version**: 3.12 or higher
-- **Installation**: [python.org](https://www.python.org/)
-- **Package Management**: [`uv`](https://docs.astral.sh/uv/)
-
-### uv (Python Package Manager)
-```bash
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Verify installation
-uv --version
-```
-
-### Gymnasium Dependencies
-```bash
-# Install via uv (handled automatically in baselines/)
-uv add gymnasium[classic-control]
-```
+This crate is v0.x infrastructure. FDRL is the v1.x target. The claim is not yet earned — the single-device benchmark has to land first.
 
 ---
 
@@ -77,14 +55,14 @@ The repository structure, CI, governance documents, baseline infrastructure (`ba
 2. **`[RESEARCH]`** — Neural network backend prototype (`burn`+`ndarray` vs `candle`) must be completed
 3. **`[RESEARCH]`** — CleanRL DQN Python baseline must be run on target hardware and results stored
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for rationale and [TODO.md](TODO.md) for the full roadmap.
+See [ARCHITECTURE.md](https://github.com/torchforge-rs/torchforge-bench/blob/main/ARCHITECTURE.md) for rationale and [TODO.md](https://github.com/torchforge-rs/torchforge-bench/blob/main/TODO.md) for the full roadmap.
 
 ---
 
 ## Roadmap
 
 | Version | Goal |
-|---|---|
+| --- | --- |
 | **Pre-v0.1.0** | FFI overhead measurement, NN backend prototype, Python baseline (hard blockers) |
 | **v0.1.0** | DQN on CartPole-v1 — results published against CleanRL, including if slower |
 | **v0.2.0** | PPO on CartPole-v1 |
@@ -100,32 +78,10 @@ The v1.x FDRL benchmark is the north star. Every methodology decision made at v0
 ## Algorithm Targets
 
 | Algorithm | Reference | Environment | Status |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | DQN | CleanRL `dqn.py` | CartPole-v1 | 🔲 Pre-requisite research |
 | PPO | CleanRL `ppo.py` | CartPole-v1 | 🔲 Blocked on v0.1.0 |
 | SAC | CleanRL `sac_continuous_action.py` | TBD | 🔲 Blocked on v0.3.0 |
-
----
-
-## Results
-
-Published benchmark results will be available in the [`results/`](results/) directory once the first benchmark (DQN on CartPole-v1) is completed in v0.1.0.
-
-### Results Format
-All results follow a standardized JSON schema documented in [`results/README.md`](results/README.md), including:
-- Complete hardware specifications
-- Software versions and environment details
-- Performance metrics with statistical analysis
-- Reproducibility information (seeds, multiple runs)
-
-### Methodology
-Every published result includes a complete methodology table with:
-- Hardware: CPU, GPU, RAM, storage specifications
-- Software: Rust, Python, dependency versions
-- Parameters: Hyperparameters, random seeds, training configuration
-- Metrics: Performance, efficiency, resource utilization
-
-See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the complete methodology specification.
 
 ---
 
@@ -150,61 +106,31 @@ Rust benchmarks run via the standard `cargo bench` interface once v0.1.0 is impl
 cargo bench --bench dqn_cartpole
 ```
 
-Every published result includes: exact hardware, OS, Rust version, Python/PyTorch version, seeds (minimum 5, mean ± std), wall-clock time (total and training-only), and peak memory. No result is published without the full methodology table. See [ARCHITECTURE.md](ARCHITECTURE.md) for the complete specification.
+Every published result includes: exact hardware, OS, Rust version, Python/PyTorch version, seeds (minimum 5, mean ± std), wall-clock time (total and training-only), and peak memory. No result is published without the full methodology table. See [ARCHITECTURE.md](https://github.com/torchforge-rs/torchforge-bench/blob/main/ARCHITECTURE.md) for the complete specification.
 
 ---
 
 ## Contributing
 
-We welcome contributions! Please read our comprehensive guides before participating:
-
-- 📖 **[Contributing Guide](CONTRIBUTING.md)** — Prerequisites, development setup, PR process, and result reproducibility policy
-- 🤝 **[Code of Conduct](CODE_OF_CONDUCT.md)** — Community standards and guidelines
-- 🔒 **[Security Policy](SECURITY.md)** — Security vulnerability reporting
-
-### How to Contribute
+See [CONTRIBUTING.md](https://github.com/torchforge-rs/torchforge-bench/blob/main/CONTRIBUTING.md) for the full guide — prerequisites (Rust, Python, `uv`), branching model, PR process, and the result reproducibility policy.
 
 The most valuable contributions right now are:
 
-- Running the CleanRL DQN baseline on your hardware and documenting results — this directly unblocks v0.1.0
-- Running the NN backend prototypes (`burn`+`ndarray` vs `candle`) and reporting compile time, binary size, and autodiff correctness
-- Measuring PyO3 FFI overhead on `CartPole-v1 env.step()`
-- Challenging assumptions in [ARCHITECTURE.md](ARCHITECTURE.md)
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/torchforge-rs/torchforge-bench.git
-cd torchforge-bench
-
-# Install Rust toolchain (automatically managed)
-rustup component add rustfmt clippy
-
-# Set up Python baselines
-cd baselines/
-uv sync
-
-# Run tests
-cargo test
-
-# Format code
-cargo fmt
-
-# Lint code
-cargo clippy -- -D warnings
-```
+* Running the CleanRL DQN baseline on your hardware and documenting results — this directly unblocks v0.1.0
+* Running the NN backend prototypes (`burn`+`ndarray` vs `candle`) and reporting compile time, binary size, and autodiff correctness
+* Measuring PyO3 FFI overhead on `CartPole-v1 env.step()`
+* Challenging assumptions in [ARCHITECTURE.md](https://github.com/torchforge-rs/torchforge-bench/blob/main/ARCHITECTURE.md)
 
 **Open an issue before submitting a PR.**
 
-Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
-Benchmark result disputes are handled via the `methodology_challenge` issue template, not as security issues — see [SECURITY.md](SECURITY.md) for what does qualify.
+Please read our [Code of Conduct](https://github.com/torchforge-rs/torchforge-bench/blob/main/CODE_OF_CONDUCT.md) before participating.
+Benchmark result disputes are handled via the `methodology_challenge` issue template, not as security issues — see [SECURITY.md](https://github.com/torchforge-rs/torchforge-bench/blob/main/SECURITY.md) for what does qualify.
 
 ---
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](https://github.com/torchforge-rs/torchforge-bench/blob/main/LICENSE).
 CleanRL baseline scripts in `baselines/` are MIT licensed — see `baselines/README.md` for attribution.
 
 Part of the [torchforge-rs](https://github.com/torchforge-rs) ecosystem — also see [torchforge-data](https://github.com/torchforge-rs/torchforge-data) and [torchforge-viz](https://github.com/torchforge-rs/torchforge-viz).
