@@ -1,0 +1,15 @@
+{
+  "total_steps": 934,
+  "total_duration_ns": 12326490,
+  "avg_step_latency_ns": 11446.421841541756,
+  "min_step_latency_ns": 8700,
+  "max_step_latency_ns": 347538,
+  "std_deviation_ns": 13050.524045603535,
+  "hardware_info": {
+    "cpu_model": "x86_64",
+    "os": "Linux",
+    "rust_version": "1.85.0",
+    "python_version": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+    "pytorch_version": "not installed"
+  }
+}

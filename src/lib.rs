@@ -6,6 +6,7 @@
 //! demonstrate measurable performance and memory advantages over Python
 //! reference implementations — particularly on edge hardware.
 //!
-//! ## Status
-//!
-//! Active development. API is not yet stable.
+//! ## Modules
+
+pub mod ffi_overhead;
+pub mod ndarray_prototype;
